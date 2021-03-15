@@ -1,19 +1,20 @@
 --[[ 
 LUA pixel circle algorithm -- by Quadrum
 
-Returns array of {x=x, y=y}'s for a circle
+Returns array with tables of positions for a circle
 All return values will be rounded integers
 
 Use circle_circumference(radius), to get an array of positions, centered on x=0,y=0, for the outer area of the circle.
 Use circle_volume(radius), to get an array of positions, centered on x=0,y=0, for the full area of the circle.
 
+Position table --> {x=0,y=0}
 ]]
 
 
 
 ---Gets position at 'degree' on a circle with 'radius' using sin and cos
----@param radius <number>
----@param degree <number>
+---@param {number} radius - Radius of circle
+---@param {number} degree - Degree to get position
 local function get_position(radius, degree)
 	local x = math.floor(math.cos(math.rad(degree))*radius + 0.5)
 	local y = math.floor(math.sin(math.rad(degree))*radius + 0.5)
@@ -21,8 +22,9 @@ local function get_position(radius, degree)
 end
 
 
----Removes duplicate values from an array full of {x=x,y=y}'s
----@param array <array> <{{x='y',y='y'},}>
+---Removes duplicate values from an array full of positions
+---@param {array} array - Array full of positions
+---@returns {array} - Array full of positions without any repetitions
 local function clean_table(array)
 	local exists = {}
 	local cleaned = {}
@@ -30,7 +32,7 @@ local function clean_table(array)
 	for _,degree in pairs(array) do 
 		if not exists[tostring(degree.x)..tostring(degree.y)] then
 		
-			-- Marks this specific value as being in the array
+			-- Marks this position as being in the array
 			exists[tostring(degree.x)..tostring(degree.y)] = true
 			table.insert(cleaned,degree)
 		end
@@ -39,9 +41,11 @@ local function clean_table(array)
 	return cleaned
 end
 
+
 --- Returns array of all positions between pos1 and pos2, not including pos1 and pos2
----@param pos1 <array> <{x=x1,y=y1}>
----@param pos2 <array> <{x=x2,y=y2}>
+---@param {table} pos1 - Position 1 
+---@param {table} pos2 - Position 2 
+
 local function get_between(pos1, pos2)
 	-- pos1 and pos2 are the same positions
 	if pos1.x - pos2.x == 0 and pos1.y - pos2.y == 0 then return {} end
@@ -57,7 +61,7 @@ local function get_between(pos1, pos2)
 	-- Take each position between pos1 and pos2 and add it to the array
 	for _x = pos1.x, pos2.x, steps.x do
 		for _y = pos1.y, pos2.y, steps.y do
-			-- If not pos1 or pos2, adds it to value array
+			-- If not pos1 or pos2, adds it to array
 			if not ((_x == pos1.x and _y == pos1.y) or (_x == pos2.x and _y == pos2.y)) then
 				table.insert(values_between,{x=_x,y=_y})
 			end
@@ -67,12 +71,14 @@ local function get_between(pos1, pos2)
 	return values_between
 end
 
-
 Public = {}
 
 
+
 ---Returns an array of positions on the outer edge of a circle
----@param radius <number>
+---@param {number} radius - Radius of circle
+---@returns {array} - Positions of outer circle
+
 function Public.circle_circumference(radius)
 	-- A radius of <1 is just the starting position
 	if radius < 1 then return {{x=0,y=0}} end
@@ -96,8 +102,11 @@ function Public.circle_circumference(radius)
 end
 
 
+
 ---Returns an array of positions of a full circle
----@param radius <number>
+---@param {number} radius - Radius of circle
+---@returns {array} - Positions of full circle
+
 function Public.circle_volume(radius)
 	if radius < 1 then return {{x=0,y=0}} end
 	-- Gets outer bounds
